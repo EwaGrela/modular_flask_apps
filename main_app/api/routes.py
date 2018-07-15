@@ -27,7 +27,12 @@ def all_cities():
 
 def get_cities():
     db = get_db()
-    results = db.execute("SELECT * FROM city").fetchall()
+    lim = request.args.get("limit")
+
+    if lim is not None:
+        results = db.execute("SELECT * FROM city limit :lim", {"lim": lim}).fetchall()
+    else:
+        results = db.execute("SELECT * FROM city").fetchall()
     results = [res['city'] for res in results]
     return jsonify(results)
 
