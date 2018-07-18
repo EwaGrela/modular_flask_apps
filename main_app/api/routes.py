@@ -15,7 +15,7 @@ def get_db():
 blueprint = Blueprint("api", __name__)
 @blueprint.route('/')
 def main_api():
-    return 'api works'
+    return "api works"
 
 @blueprint.route('/all_cities', methods= ["GET", "POST"])
 def all_cities():
@@ -27,19 +27,34 @@ def all_cities():
 
 def get_cities():
     db = get_db()
+    country = request.args.get("country")
     lim = request.args.get("limit")
-
-    if lim is not None:
-        results = db.execute("SELECT * FROM city limit :lim", {"lim": lim}).fetchall()
+    page = request.args.get("page")
+    print(country)
+    print(lim)
+    if country is not None:
+        if lim is not None and page is not None:
+            results = db.execute("select city from city where country_id =(select country_id from country where country = :country) limit :lim offset :offs", {"country": country, "lim": lim, "offs":int(lim)*(int(page)-1)}).fetchall()
+        elif lim is not None and page is None:
+            results = db.execute("select city from city where country_id =(select country_id from country where country = :country) limit :lim", {"country": country, "lim": lim}).fetchall()
+        else:
+            results = db.execute("select city from city where country_id =(select country_id from country where country = :country)", {"country": country}).fetchall()
+            results = [res["city"] for res in results]
+            return jsonify(results)
     else:
-        results = db.execute("SELECT * FROM city").fetchall()
-    results = [res['city'] for res in results]
+        if lim is not None and page is not None:
+            results = db.execute("select city from city limit :lim offset :offs", {"lim": lim, "offs": int(lim)*(int(page)-1) }).fetchall()
+            results = [res["city"] for res in results]
+            return jsonify(results)
+        elif lim is not None and page is None:
+            results = db.execute("select city from city limit :lim", {"lim": lim}).fetchall()
+        else:
+            results = db.execute("select city from city").fetchall()
+    results = [res["city"] for res in results]
     return jsonify(results)
 
-
-def add_city():
-    db = get_db
-    return "to be added later"
+def post_city():
+    return "will implement later"
 
 @blueprint.route("/all_actors", methods = ["GET", "POST"])
 def all_actors():
