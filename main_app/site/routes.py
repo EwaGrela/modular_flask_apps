@@ -29,3 +29,14 @@ def get_cities():
     return render_template("site/cities.html", cities = results)
 
 
+@blueprint.route("/all_actors", methods =["GET", "POST"])
+def all_actors():
+    if request.method =="GET":
+        return get_actors()
+    else:
+        return post_actor()
+        
+def get_actors():
+    db = get_db()
+    results = db.execute("select * from actor").fetchall()
+    return render_template("site/actors.html", actors = results)

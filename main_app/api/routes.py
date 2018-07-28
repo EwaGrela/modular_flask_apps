@@ -72,4 +72,37 @@ def get_actors():
 def post_actor():
     return "to be added later"
 
+@blueprint.route("/all_countries", methods=["GET", "POST"])
+def all_countries():
+    if request.method == "GET":
+        return get_countries()
+    else:
+        return post_country()
+
+def get_countries():
+    db = get_db()
+    limit = request.args.get("limit")
+    letter = request.args.get("letter").upper()
+    print("letter", letter, type(letter))
+    
+    if limit is None:
+        if letter is None:
+            results = db.execute("select * from country order by country").fetchall()
+            results = [result["country"] for result in results]
+            return jsonify(results)
+        else:
+            results = db.execute("select * from country  where country like :letter", {"letter": letter + "%" }).fetchall()
+            results = [result["country"] for result in results]
+            return jsonify(results)
+    else:
+        if letter is None:
+            results = db.execute("select * from country limit :limit", {"limit": limit}).fetchall()
+            results = [result["country"] for result in results]
+            return jsonify(results)
+        else:
+            results = db.execute("select * from country where country like :letter limit :limit", {"limit": limit, "letter": letter + "%"}).fetchall()
+            results = [result["country"] for result in results]
+            return jsonify(results)
+
+
 # more endpoint will be added later, as I expand the application
